@@ -1,3 +1,9 @@
+/*
+Copyright 2022 The ProDocs Authors. All rights reserved.
+Use of this source code is governed by a BSD-style license
+that can be found in the LICENSE file.
+*/
+
 package config
 
 import (
@@ -9,9 +15,10 @@ import (
 // ProdocsConfig is the config schema for the main prodocs application
 type ProdocsConfig struct {
 	Port         string `yaml:"port"`
+	PAT          string `yaml:"pat"`
 	Repositories []struct {
 		Url string `yaml:"url"`
-		PAT string `yaml:"PAT"`
+		PAT string `yaml:"pat"`
 	} `yaml:"repositories"`
 	GitFetchDuration string `yaml:"gitFetchDuration"`
 }
