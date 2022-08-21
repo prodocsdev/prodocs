@@ -7,6 +7,7 @@ that can be found in the LICENSE file.
 package fetcher
 
 import (
+	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/prodocsdev/prodocs/config"
@@ -23,7 +24,7 @@ func FetchPackages(config *config.ProdocsConfig) {
 		} else {
 			pat = config.PAT
 		}
-		_, err := git.PlainClone("./output", false, &git.CloneOptions{
+		_, err := git.PlainClone(fmt.Sprintf("%s/%s", config.StoragePath, repository.Url), false, &git.CloneOptions{
 			Auth: &http.BasicAuth{
 				Username: "foo",
 				Password: pat,
