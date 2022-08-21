@@ -57,6 +57,9 @@ prodocs
 # *.iml
 # *.ipr
 
+# idea folder
+.idea/*
+
 # CMake
 cmake-build-*/
 
