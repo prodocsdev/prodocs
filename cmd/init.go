@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	path string
+	path                string
+	ParsedProDocsConfig *config.ProdocsConfig
 
-	fetchCommand = &cobra.Command{
+	initCommand = &cobra.Command{
 		Use:   "fetch",
 		Short: "Fetch All repositories in config",
 		Long:  `Clones all repositories in config, and stores them in the local repository cache.`,
@@ -29,11 +30,12 @@ var (
 			if err != nil {
 				panic(err)
 			}
+			ParsedProDocsConfig = config
 			fetcher.FetchPackages(config)
 		},
 	}
 )
 
 func init() {
-	fetchCommand.Flags().StringVarP(&path, "path", "p", "", "config file path")
+	initCommand.Flags().StringVarP(&path, "path", "p", "", "config file path")
 }

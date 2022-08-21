@@ -37,5 +37,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.AddCommand(fetchCommand)
+	rootCmd.AddCommand(initCommand)
 }
