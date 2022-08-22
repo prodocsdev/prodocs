@@ -1,88 +1,64 @@
 /*
-Copyright 2022 The ProDocs Authors. All rights reserved.
-Use of this source code is governed by a BSD-style license
-that can be found in the LICENSE file.
+Copyright 2022 The ProDocs Authors.
+All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file.
 */
 
 package config
 
 import (
-	"errors"
-	"fmt"
-	"gopkg.in/yaml.v3"
+	"encoding/json"
+	"github.com/spf13/viper"
 	"log"
-	"os"
 )
+
+type Repository struct {
+	Url string `yaml:"url" json:"url"`
+	PAT string `yaml:"PAT" json:"PAT"`
+}
 
 // ProdocsConfig is the config schema for the main prodocs application
 type ProdocsConfig struct {
-	Port         string `yaml:"port"`
-	PAT          string `yaml:"pat"`
-	Repositories []struct {
-		Url string `yaml:"url"`
-		PAT string `yaml:"pat"`
-	} `yaml:"repositories"`
-	GitFetchDuration string `yaml:"gitFetchDuration"`
-	StoragePath      string `yaml:"storagePath"`
+	// Port is the HTTP port at which the prodocs service will be available
+	Port string `yaml:"port" json:"port"`
+
+	// PAT is the GitHub PAT used to authenticate when cloning repositories
+	PAT string `yaml:"PAT" json:"PAT"`
+
+	// Repositories is the list of git repositories that need to be cloned
+	Repositories []Repository `yaml:"repositories" json:"repositories"`
+
+	// StoragePath is path at which the cloned repositories are stored
+	StoragePath string `yaml:"storagePath" json:"storagePath"`
+
+	// OutputPath is the path at which the output html files will be stored
+	OutputPath string `yaml:"outputPath" json:"outputPath"`
 }
 
 // NewProdocsConfig initialises a new config object from a YAML file
-func NewProdocsConfig(configPath string) (*ProdocsConfig, error) {
-	err := validateConfigPath(configPath)
+func NewProdocsConfig(path string) (*ProdocsConfig, error) {
+	viper.SetConfigFile(path)
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Printf("Error reading config file: %v", err)
+		log.Println("Falling back to defaults")
+	}
+
+	config := &ProdocsConfig{
+		Port:        "8080",
+		StoragePath: "$HOME/prodocs/repos",
+		OutputPath:  "$HOME/prodocs/docs",
+	}
+
+	err = viper.Unmarshal(&config)
 	if err != nil {
 		return nil, err
 	}
 
-	config := &ProdocsConfig{}
+	var configJsonStr []byte
+	configJsonStr, err = json.Marshal(&config)
+	log.Printf("Initialised with config: %v", string(configJsonStr))
 
-	var file *os.File
-	file, err = os.Open(configPath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	// Init new YAML decode
-	d := yaml.NewDecoder(file)
-	if err = d.Decode(&config); err != nil {
-		return nil, err
-	}
-
-	err = ensureStorageDir(config.StoragePath)
-	if err != nil {
-		log.Println("Error validating storage path: ", err, " - using default")
-		config.StoragePath = os.TempDir() + "/prodocs"
-	}
 	return config, nil
-}
-
-// validateConfigPath checks if the path is a readable file or not
-func validateConfigPath(path string) error {
-	s, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if s.IsDir() {
-		return fmt.Errorf("'%s' is a directory, not a normal file", path)
-	}
-	return nil
-}
-
-func ensureStorageDir(dirName string) error {
-	err := os.Mkdir(dirName, 0777)
-	if err == nil {
-		return nil
-	}
-	if os.IsExist(err) {
-		// check that the existing path is a directory
-		info, err := os.Stat(dirName)
-		if err != nil {
-			return err
-		}
-		if !info.IsDir() {
-			return errors.New("path exists but is not a directory")
-		}
-		return nil
-	}
-	return err
 }
