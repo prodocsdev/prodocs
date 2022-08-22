@@ -48,7 +48,7 @@ func NewProdocsConfig(path string) (*ProdocsConfig, error) {
 	config := &ProdocsConfig{
 		Port:        "8080",
 		StoragePath: "$HOME/prodocs/repos",
-		OutputPath:  "$HOME/.prodocs/html",
+		OutputPath:  "$HOME/prodocs/docs",
 	}
 
 	err = viper.Unmarshal(&config)
