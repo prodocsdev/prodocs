@@ -1,3 +1,8 @@
+/*
+ * Copyright 2022 The ProDocs Authors. All rights reserved. Use of this source code
+ * is governed by a BSD-style license that can be found in the LICENSE file.
+ */
+
 package api
 
 import (
@@ -11,7 +16,7 @@ type ProdocsHTTPServer struct {
 	port   string
 }
 
-// NewProdocsHTTPServer is
+// NewProdocsHTTPServer is the main HTTP server that is exposed to the users
 func NewProdocsHTTPServer(config *config.ProdocsConfig) (*ProdocsHTTPServer, error) {
 	s := ProdocsHTTPServer{
 		server: echo.New(),
@@ -26,5 +31,7 @@ func (p *ProdocsHTTPServer) Start() {
 }
 
 func (p *ProdocsHTTPServer) setupRoutes() {
-
+	p.server.GET("/", Index)
+	p.server.GET("/:path", Path)
+	p.server.POST("/hook", Hook)
 }
